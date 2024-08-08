@@ -3,8 +3,7 @@
 
 
 ## Table of Contents
-1. [General Info]
-    <a name="general-info"> </a>
+1. <a name="general-info"> [General Info]</a>
 2. [Technologies](#technologies)
 3. [Installation](#installation)
 4. [Collaboration](#collaboration)
