@@ -9,7 +9,7 @@
 4. [Collaboration](#collaboration)
 5. [FAQs](#faqs)
 
-## General Info
+## general-info
 
 
 
