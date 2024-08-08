@@ -1,2 +1,16 @@
-# human resources management software
- A program to manage the employees and a shift work system
+# HRMS (human resources management software)
+ A program to manage the employees and the diffrent shift work departments.
+
+
+## Table of Contents
+1. [General Info]
+    <a name="general-info"> </a>
+2. [Technologies](#technologies)
+3. [Installation](#installation)
+4. [Collaboration](#collaboration)
+5. [FAQs](#faqs)
+
+## General Info
+
+
+
