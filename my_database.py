@@ -1,6 +1,9 @@
 import sqlite3
 
 ########## INITIALIZING FUNCTIONS ##########
+def initialize_database(database, table, data):
+    create_table(database, table)
+    add_column(database, table, data)
 
 # Establish a connection to the database. If the database does not exist, create a new one
 def create_database_connection(new_database):
@@ -17,12 +20,26 @@ def create_table(database, new_table):
     try:
         con = create_database_connection(database)
         cursor = con.cursor()
-        cursor.execute(f"CREATE TABLE IF NOT EXISTS {new_table} (id INTEGER PRIMARY KEY AUTOINCREMENT)")
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {new_table} (
+                id INTEGER PRIMARY KEY AUTOINCREMENT
+            )
+        """)
         print(f"Created {new_table} successfully!")
         con.commit()
         cursor.close()
     except sqlite3.Error as err:
         print(f"Error creating {new_table} table: {err}")
+
+# Helper function to get existing columns in the table
+def get_existing_columns(database, table):
+    query = f"PRAGMA table_info({table})"
+    columns_info = execute_query(database, query)
+    existing_columns = []
+    for col in columns_info:
+        if col[1] != "id":
+            existing_columns.append(f"{col[1]} {col[2]}")
+    return ", ".join(existing_columns)
 
 
 # Executes SQL queries and returns the results
@@ -64,22 +81,44 @@ def column_exists(database, table, column_name):
         if col[1] == column_name:
             return True
     return False
+
+# Checks type of column
+def get_column_type(database, table, column_name):
+    query = f"PRAGMA table_info({table})"
+    columns_info = execute_query(database, query)
+
+    for col in columns_info:
+        if col[1] == column_name:
+            return col[2].upper()  
+    
+    return None
+
+# Gets the next ID in database
+def get_next_id(database, table):
+    query = f"SELECT MAX(id) FROM {table}"
+    result = execute_query(database, query)
+    max_id = result[0][0]
+    return (max_id + 1) if max_id is not None else 1
           
 ########## DATA ENTRY FUNCTION ##########
 
-# Adds entrys to the table. If column does not exist, creates a new one
-def add_entry(database, table, data):
+# Adds entry to the table. If column does not exist, creates a new one
+def add_entry(database, table, data, column_types):
+    create_table(database, table)
     for column_name, value in data.items():
-        if not column_exists(database, table, column_name):
-            add_column(database, table, column_name, "TEXT")
+        if column_name != "id" and not column_exists(database, table, column_name):
+            column_type = column_types.get(column_name, "TEXT")  # Default to TEXT if not specified
+            add_column(database, table, column_name, column_type)
 
-    columns = ", ".join(data.keys())
-    placeholders = ", ".join(["?" for _ in data.values()])
-    values = tuple(data.values())
+    # Exclude 'id' from columns and data
+    columns = ", ".join(column for column in data.keys() if column != "id")
+    placeholders = ", ".join(["?" for _ in data.keys() if _ != "id"])
+    values = tuple(value for column, value in data.items() if column != "id")
     
     insert_query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
     execute_query(database, insert_query, values)
     print(f"Added entry successfully!")
+
 
 
 # Updates an existing entry. If entry does not exist creates a new one
